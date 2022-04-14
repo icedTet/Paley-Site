@@ -17,7 +17,7 @@ export class Encryptions {
         { algorithm: "RS512" },
         (er, encrypted) => (er ? rej(er) : res(encrypted))
       )
-    );
+    ) as Promise<string>;
   }
   /**
    * Decrypts a payload with the JWT secret

@@ -11,29 +11,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(400).send("Email and password required");
   }
   const mongo = await withMongo();
+
+  const hashedPassword = (await new Promise((res, rej) =>
+    phas(password).hash((err, hash) => {
+      if (err) {
+        rej(err);
+      }
+      res(hash);
+    })
+  )) as string;
+  const userCreate = await mongo
+    .db("blog")
+    .collection("users")
+    .insertOne({ email: email.toLowerCase(), password: hashedPassword });
+
   const user = await mongo
     .db("blog")
     .collection("users")
     .findOne({ email: email.toLowerCase() });
-  const hashedPassword = (await new Promise((res, rej) =>
-    phas(password).verifyAgainst(user?.password, (err, verified) => {
-      if (err) {
-        rej(err);
-      }
-      res(verified);
-    })
-  )) as boolean;
   if (!user || !hashedPassword) {
     return res.status(401).send("Invalid email or password");
   }
-  res.status(200).send(await Encryptions.issueUserToken({ id: user._id }));
-  // if (!post) {
-  //   return res.status(404).json({
-  //     statusCode: 404,
-  //     message: "Post not found",
-  //   });
-  // }
-  // res.status(200).json(post);
+  res.status(200).send(await Encryptions.issueUserToken(user._id));
   mongo.close();
 };
 
