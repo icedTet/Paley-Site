@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useLayoutEffect, useState } from "react";
 import { AtSymbolIcon, ExclamationIcon, HashtagIcon, KeyIcon } from "@heroicons/react/outline";
+import { UserClass } from "../../utils/classes/UserClass";
 const AdminPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -106,6 +107,7 @@ const AdminPage = () => {
               if (res.ok) {
                 const data = await res.text();
                 localStorage.setItem("token", `Bearer ${data}` as string);
+                UserClass.getInstance().getUser()
                 router.push("/admin/dashboard");
               }else{
                 setError(true);

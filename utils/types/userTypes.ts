@@ -7,3 +7,4 @@ export type UserType = {
   avatar?: string;
   bio?: string;
 };
+

@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Encryptions } from "../../../utils/Encryptions";
 import { withMongo } from "../../../utils/mongoFunctions";
@@ -19,19 +20,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         message: "No authorization header provided",
       });
     }
-    const userID = await Encryptions.decrypt(
+    const userID = (await Encryptions.decrypt(
       req.headers.authorization.substring(7)
-    ).then((x) => (x as { id: string }).id);
+    ).then((x) => (x as any).data.userID.id)) as string;
     if (!userID) {
       return res.status(401).json({
         statusCode: 401,
         message: "Invalid authorization header",
-      }); 
+      });
     }
     const user = await mongo
       .db("blog")
       .collection("users")
-      .findOne({ _id: userID });
+      .findOne({ _id: new ObjectId(userID as string) });
     if (!user) {
       return res.status(404).json({
         statusCode: 404,
@@ -44,7 +45,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const user = await mongo
     .db("blog")
     .collection("users")
-    .findOne({ _id: userID });
+    .findOne({ _id: new ObjectId(userID as string) });
   if (!user) {
     return res.status(404).json({
       statusCode: 404,
